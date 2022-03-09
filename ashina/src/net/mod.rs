@@ -7,12 +7,12 @@ use std::io;
 pub trait ITcpListener {
     type TcpStream: ITcpStream + Send;
     type SocketAddr: std::fmt::Debug;
-    fn bind<'ashina>(addr: &str) -> BoxFuture<'ashina, io::Result<Self>>
+    fn bind<'ashina>(addr: &'ashina str) -> BoxFuture<'ashina, io::Result<Self>>
     where
         Self: Sized;
 
     fn accept<'ashina>(
-        &self,
+        &'ashina self,
     ) -> BoxFuture<'ashina, io::Result<(Self::TcpStream, Self::SocketAddr)>>;
 }
 

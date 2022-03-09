@@ -1,0 +1,11 @@
+[package]
+name = "tokio-server"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ashina = { path = "../ashina" }
+tokio = { version = "1", features = ["full"] }
+futures03 = { package = "futures", version = "0.3", features = ["compat"] }

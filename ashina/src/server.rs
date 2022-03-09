@@ -1,6 +1,7 @@
 use crate::net::{http::*, ITcpListener, ITcpStream};
 use crate::runtime::Runtime;
 use std::error::Error as StdError;
+use std::marker::PhantomData;
 
 const BUFFER_SIZE: usize = 1024;
 
@@ -24,6 +25,21 @@ impl<'ashina> HttpServerBuilder<'ashina> {
         self.port = Some(port);
         self
     }
+    pub async fn build<T, R>(&self) -> Result<Server<T, R>, Box<dyn StdError>>
+    where
+        T: ITcpListener,
+        R: Runtime,
+    {
+        let ip = self.ip.unwrap_or("127.0.0.1");
+        let port = self.port.unwrap_or(80);
+        let addr = format!("{}:{}", ip, port);
+        let listener = T::bind(&addr).await?;
+
+        Ok(Server {
+            listener,
+            _marker: PhantomData,
+        })
+    }
 }
 
 pub struct Server<T, R>
@@ -32,7 +48,7 @@ where
     R: Runtime,
 {
     listener: T,
-    _marker: std::marker::PhantomData<R>,
+    _marker: PhantomData<R>,
 }
 
 impl<T: ITcpListener + 'static, R: Runtime> Server<T, R> {

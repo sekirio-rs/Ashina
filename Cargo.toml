@@ -1,5 +1,6 @@
 [workspace]
 members = [
   "xtask",
-  "ashina"
+  "ashina",
+  "tokio-server"
 ]
