@@ -62,6 +62,7 @@ fn main() -> anyhow::Result<()> {
             if let Some(package) = cmd.package {
                 match package.as_str() {
                     "ashina" => ashina::build(cmd.release)?,
+                    "tokio-server" => tokio_server::build(cmd.release)?,
                     name => {
                         log::debug!("unknown package: {}", name);
                     }
@@ -101,5 +102,11 @@ impl XTask {
 mod ashina {
     pub fn build(is_release: bool) -> anyhow::Result<()> {
         crate::XTask::build("ashina", is_release)
+    }
+}
+
+mod tokio_server {
+    pub fn build(is_release: bool) -> anyhow::Result<()> {
+        crate::XTask::build("tokio-server", is_release)
     }
 }
