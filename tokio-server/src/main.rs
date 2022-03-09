@@ -68,8 +68,10 @@ impl Runtime for Tokio {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    simple_logger::SimpleLogger::new().init()?;
+
     let server = HttpServerBuilder::new()
-        .ip("127.0.0.1")
+        .ip("0.0.0.0")
         .port(3344)
         .build::<TcpListenerWrapper, Tokio>()
         .await?;

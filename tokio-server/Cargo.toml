@@ -9,3 +9,4 @@ edition = "2021"
 ashina = { path = "../ashina" }
 tokio = { version = "1", features = ["full"] }
 futures03 = { package = "futures", version = "0.3", features = ["compat"] }
+simple_logger = "2.1.0"

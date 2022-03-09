@@ -8,4 +8,3 @@ edition = "2021"
 [dependencies]
 futures03 = { package = "futures", version = "0.3", features = ["compat"] }
 log = "0.4"
-simple_logger = "2.1.0"
