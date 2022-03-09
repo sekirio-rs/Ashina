@@ -1,4 +1,4 @@
-use crate::net::{http::*, ITcpListener, ITcpStream};
+use crate::net::{http, ITcpListener, ITcpStream};
 use crate::runtime::Runtime;
 use std::error::Error as StdError;
 use std::marker::PhantomData;
@@ -54,7 +54,7 @@ where
 impl<T: ITcpListener + 'static, R: Runtime> Server<T, R> {
     pub async fn serve(
         self,
-        service_fn: impl Fn(&HttpRequest) -> Result<HttpResponse, Box<dyn StdError>>
+        service_fn: impl Fn(&http::Request) -> Result<http::Response, Box<dyn StdError + Send>>
             + Send
             + Copy
             + 'static,
@@ -72,11 +72,18 @@ impl<T: ITcpListener + 'static, R: Runtime> Server<T, R> {
                     .await
                     .expect("failed to read data from socket");
 
-                let request = HttpRequest::from_bytes(&buf).unwrap_or_default();
-                let response = service_fn(&request).unwrap_or_default();
+                let request = http::Request::Raw(String::from_utf8_lossy(&buf).to_string());
+                let ret = service_fn(&request);
 
-                if let Err(e) = stream.write(response.as_bytes()).await {
-                    log::error!("send response error: {:?}", e);
+                match ret {
+                    Ok(response) => {
+                        if let Err(e) = stream.write(response.as_bytes()).await {
+                            log::error!("send response error: {:?}", e);
+                        }
+                    }
+                    Err(e) => {
+                        log::error!("handle request {:?} \nerror: {:?}", request, e);
+                    }
                 }
             });
         }

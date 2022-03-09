@@ -1,7 +1,9 @@
 //! service handler
-use crate::net::http::*;
+use crate::net::http;
 
-pub fn simple_handler(req: &HttpRequest) -> Result<HttpResponse, Box<dyn std::error::Error>> {
+pub fn simple_handler(
+    req: &http::Request,
+) -> Result<http::Response, Box<dyn std::error::Error + Send>> {
     log::info!("handle request: {:?}", req);
 
     let resp = format!(
@@ -9,5 +11,5 @@ pub fn simple_handler(req: &HttpRequest) -> Result<HttpResponse, Box<dyn std::er
         "Ashina", "Goobye, Sekiro."
     );
 
-    Ok(HttpResponse::from_bytes(resp.as_bytes())?)
+    Ok(http::Response::Raw(resp))
 }

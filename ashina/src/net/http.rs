@@ -1,19 +1,37 @@
 //! HTTP protocol
-//! should be moved under sekirio-rs
+//!
+//! currently unused
+use std::error::Error as StdError;
 
 pub type HttpHeader = std::collections::HashMap<String, String>;
 
+// ----- request -----
+
+#[derive(Debug)]
+pub enum Request {
+    Raw(String),
+    Parsed(HttpRequest),
+}
+
+/// HTTP request
 #[derive(Default, Debug)]
 pub struct HttpRequest {
+    /// request line
     pub req_line: HttpRequestLine,
+    /// request header
     pub header: HttpHeader,
+    /// request body
     pub body: Vec<u8>,
 }
 
+/// HTTP request line
 #[derive(Default, Debug)]
 pub struct HttpRequestLine {
+    /// request function
     pub func: HttpRequestFunction,
+    /// request url
     pub url: String,
+    /// http version
     pub version: (u16, u16),
 }
 
@@ -36,8 +54,28 @@ impl std::default::Default for HttpRequestFunction {
 }
 
 impl HttpRequest {
-    pub fn from_bytes(_bytes: &[u8]) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn from_bytes(_bytes: &[u8]) -> Result<Self, Box<dyn StdError>> {
         todo!()
+    }
+
+    pub fn as_bytes(&self) -> &[u8] {
+        todo!()
+    }
+}
+
+// ----- response -----
+
+pub enum Response {
+    Raw(String),
+    Parsed(HttpResponse),
+}
+
+impl Response {
+    pub fn as_bytes(&self) -> &[u8] {
+        match self {
+            Response::Raw(s) => s.as_bytes(),
+            Response::Parsed(r) => r.as_bytes(),
+        }
     }
 }
 
@@ -63,7 +101,7 @@ impl HttpResponse {
     pub fn as_bytes(&self) -> &[u8] {
         todo!()
     }
-    pub fn from_bytes(_bytes: &[u8]) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn from_bytes(_bytes: &[u8]) -> Result<Self, Box<dyn StdError>> {
         todo!()
     }
 }
