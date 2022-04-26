@@ -3,5 +3,6 @@ members = [
   "xtask",
   "ashina",
   "tokio-server",
+  "async-std-server",
   "emma-server"
 ]

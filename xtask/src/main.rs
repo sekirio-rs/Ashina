@@ -63,6 +63,8 @@ fn main() -> anyhow::Result<()> {
                 match package.as_str() {
                     "ashina" => ashina::build(cmd.release)?,
                     "tokio-server" => tokio_server::build(cmd.release)?,
+                    "async-std-server" => async_std_server::build(cmd.release)?,
+                    "emma-server" => emma_server::build(cmd.release)?,
                     name => {
                         log::debug!("unknown package: {}", name);
                     }
@@ -108,5 +110,17 @@ mod ashina {
 mod tokio_server {
     pub fn build(is_release: bool) -> anyhow::Result<()> {
         crate::XTask::build("tokio-server", is_release)
+    }
+}
+
+mod emma_server {
+    pub fn build(is_release: bool) -> anyhow::Result<()> {
+        crate::XTask::build("emma-server", is_release)
+    }
+}
+
+mod async_std_server {
+    pub fn build(is_release: bool) -> anyhow::Result<()> {
+        crate::XTask::build("async-std-server", is_release)
     }
 }
