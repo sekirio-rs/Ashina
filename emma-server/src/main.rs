@@ -1,38 +1,46 @@
-use ashina::net::{ITcpListener, ITcpStream};
-use emma::net::tcp::{TcpListener, TcpStream};
-use emma::Emma;
-use futures03::future::BoxFuture;
+use emma::alias::*;
+use emma::net::tcp::TcpListener;
 
-#[macro_use]
-extern crate ref_thread_local;
-use ref_thread_local::RefThreadLocal;
+const BUFFER_SIZE: usize = 1024;
 
-ref_thread_local! {
-    static managed EMMA: Emma = emma::Builder::new().build().unwrap();
-}
+fn main() -> std::io::Result<()> {
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .build()
+        .unwrap();
 
-struct TcpStreamWrapper(TcpStream);
+    rt.block_on(async {
+        let emma = emma::Builder::new().build().unwrap();
 
-impl ITcpStream for TcpStreamWrapper {
-    fn read<'ashina>(
-        &'ashina mut self,
-        buf: &'ashina mut [u8],
-    ) -> BoxFuture<'ashina, std::io::Result<usize>> {
-        // let fut = EMMA.with(|emma: &Emma| self.0.recv(&emma, buf).unwrap());
-        let fut = self.0.recv(&EMMA.borrow(), buf).unwrap();
-        todo!()
-    }
+        let listener = TcpListener::bind("0.0.0.0:3344").unwrap();
 
-    fn write<'ashina>(
-        &'ashina mut self,
-        src: &'ashina [u8],
-    ) -> BoxFuture<'ashina, std::io::Result<()>> {
-        todo!()
-    }
-}
+        loop {
+            let stream = accept_socket(&emma, &listener)
+                .await
+                .expect("accept_socket error");
 
-struct TcpListenerWrapper(TcpListener);
+            std::thread::spawn(move || {
+                tokio::runtime::Builder::new_current_thread()
+                    .build()
+                    .unwrap()
+                    .block_on(async move {
+                        let emma = emma::Builder::new().build().unwrap();
 
-fn main() {
-    println!("Hello, Emma!");
+                        let mut buf = [0; BUFFER_SIZE];
+
+                        let _n = recv_msg(&emma, &mut buf, &stream)
+                            .await
+                            .expect("recv_msg error");
+
+                        let resp = format!(
+                            "HTTP/1.1 200 OK\r\nServer: {}\r\n\r\n{}",
+                            "Ashina", "Goobye, Sekiro."
+                        );
+
+                        send_msg(&emma, resp.as_bytes(), &stream)
+                            .await
+                            .expect("send_msg error");
+                    })
+            });
+        }
+    })
 }
