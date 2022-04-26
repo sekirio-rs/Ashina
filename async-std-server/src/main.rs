@@ -68,7 +68,7 @@ impl Runtime for AsyncStd {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // simple_logger::SimpleLogger::new().init()?;
-
+    
     async_std::task::block_on(async {
         let server = HttpServerBuilder::new()
             .ip("0.0.0.0")

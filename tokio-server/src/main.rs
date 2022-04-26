@@ -7,6 +7,8 @@ use futures03::FutureExt;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
+const CORES: usize = 32;
+
 struct TcpStreamWrapper(TcpStream);
 
 impl ITcpStream for TcpStreamWrapper {
@@ -70,6 +72,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // simple_logger::SimpleLogger::new().init()?;
 
     let rt = tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(CORES)
         .enable_io()
         .build()
         .unwrap();
