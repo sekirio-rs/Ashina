@@ -31,10 +31,8 @@ fn main() -> std::io::Result<()> {
                             .await
                             .expect("recv_msg error");
 
-                        let resp = format!(
-                            "HTTP/1.1 200 OK\r\nServer: {}\r\n\r\n{}",
-                            "Ashina", "Goobye, Sekiro."
-                        );
+                        let resp =
+                            format!("HTTP/1.1 200 OK\r\nServer: {}\r\n\r\n{:?}", "Ashina", &buf);
 
                         send_msg(&emma, resp.as_bytes(), &stream)
                             .await

@@ -66,17 +66,23 @@ impl Runtime for Tokio {
     }
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    simple_logger::SimpleLogger::new().init()?;
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // simple_logger::SimpleLogger::new().init()?;
 
-    let server = HttpServerBuilder::new()
-        .ip("0.0.0.0")
-        .port(3344)
-        .build::<TcpListenerWrapper, Tokio>()
-        .await?;
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .enable_io()
+        .build()
+        .unwrap();
 
-    server.serve(simple_handler).await?;
+    rt.block_on(async {
+        let server = HttpServerBuilder::new()
+            .ip("0.0.0.0")
+            .port(3344)
+            .build::<TcpListenerWrapper, Tokio>()
+            .await?;
 
-    Ok(())
+        server.serve(simple_handler).await?;
+
+        Ok(())
+    })
 }
