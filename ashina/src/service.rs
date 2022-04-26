@@ -7,8 +7,9 @@ pub fn simple_handler(
     log::info!("handle request: {:?}", req);
 
     let resp = format!(
-        "HTTP/1.1 200 OK\r\nServer: {}\r\n\r\n{}",
-        "Ashina", "Goobye, Sekiro."
+        "HTTP/1.1 200 OK\r\nServer: {}\r\n\r\n{:?}",
+        "Ashina",
+        req.as_bytes()
     );
 
     Ok(http::Response::Raw(resp))

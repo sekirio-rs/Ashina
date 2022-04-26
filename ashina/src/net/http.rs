@@ -13,6 +13,15 @@ pub enum Request {
     Parsed(HttpRequest),
 }
 
+impl Request {
+    pub fn as_bytes(&self) -> &[u8] {
+        match self {
+            Request::Raw(s) => s.as_bytes(),
+            Request::Parsed(r) => r.as_bytes(),
+        }
+    }
+}
+
 /// HTTP request
 #[derive(Default, Debug)]
 pub struct HttpRequest {
