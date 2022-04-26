@@ -2,5 +2,6 @@
 members = [
   "xtask",
   "ashina",
-  "tokio-server"
+  "tokio-server",
+  "emma-server"
 ]
