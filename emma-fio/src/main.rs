@@ -29,6 +29,10 @@ async fn files(
 }
 
 fn main() -> std::io::Result<()> {
+    use std::time;
+
+    let start = time::Instant::now();
+
     let mut handles = Vec::new();
 
     for _ in 0..CORES {
@@ -41,24 +45,46 @@ fn main() -> std::io::Result<()> {
                 let emma = emma::Builder::new().build().unwrap();
                 let size = BENCH_SIZE / CORES;
 
-                let mut files = files(&emma, "Cargo.toml", false, size)
-                    .await
-                    .expect("open files error");
-
                 let mut bufs = (0..size)
                     .into_iter()
                     .map(|_| [0u8; BUFFER_SIZE])
                     .collect::<Vec<[u8; BUFFER_SIZE]>>();
 
-                let mut join = emma::Join::new(emma::Reactor::new(&emma));
-
-                for fut in File::multi_read(&mut files, &emma, &mut bufs).expect("multi_read error")
                 {
-                    join.as_mut().join(fut);
+                    let mut files = files(&emma, "Cargo.toml", false, size)
+                        .await
+                        .expect("open files error");
+
+                    let mut join = emma::Join::new(emma::Reactor::new(&emma));
+
+                    for fut in
+                        File::multi_read(&mut files, &emma, &mut bufs).expect("multi_read error")
+                    {
+                        join.as_mut().join(fut);
+                    }
+
+                    join.await.map(|_| ()).map_err(|e| e.as_io_error())?;
                 }
 
-                join.await.map(|_| ()).map_err(|e| e.as_io_error())
+                {
+                    let mut files = files(&emma, "/dev/null", true, size)
+                        .await
+                        .expect("create file error");
+
+                    let mut join = emma::Join::new(emma::Reactor::new(&emma));
+
+                    for fut in
+                        File::multi_write(&mut files, &emma, &bufs).expect("multi_write error")
+                    {
+                        join.as_mut().join(fut);
+                    }
+
+                    join.await.map(|_| ()).map_err(|e| e.as_io_error())?;
+                }
+
+                Ok(())
             }) {
+                let e: std::io::Error = e;
                 eprintln!("io error: {:?}", e);
             }
         });
@@ -69,6 +95,13 @@ fn main() -> std::io::Result<()> {
     for h in handles {
         h.join().unwrap();
     }
+
+    let cost = start.elapsed().as_micros();
+
+    println!(
+        "[emma-fio] bench size: {}, cost: {} micros",
+        BENCH_SIZE, cost
+    );
 
     Ok(())
 }

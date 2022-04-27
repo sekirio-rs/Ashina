@@ -23,7 +23,7 @@ impl<'ashina> HttpServerBuilder<'ashina> {
         self.port = Some(port);
         self
     }
-    pub async fn build<const N: usize, T, R>(&self) -> Result<Server<N, T, R>, Box<dyn StdError>>
+    pub async fn build<T, R, const N: usize>(&self) -> Result<Server<T, R, N>, Box<dyn StdError>>
     where
         T: ITcpListener,
         R: Runtime,
@@ -40,7 +40,7 @@ impl<'ashina> HttpServerBuilder<'ashina> {
     }
 }
 
-pub struct Server<const N: usize, T, R>
+pub struct Server<T, R, const N: usize>
 where
     T: ITcpListener,
     R: Runtime,
@@ -49,7 +49,7 @@ where
     _marker: PhantomData<R>,
 }
 
-impl<const N: usize, T: ITcpListener + 'static, R: Runtime> Server<N, T, R> {
+impl<T: ITcpListener + 'static, R: Runtime, const N: usize> Server<T, R, N> {
     pub async fn serve(
         self,
         service_fn: impl Fn(&http::Request) -> Result<http::Response, Box<dyn StdError + Send>>

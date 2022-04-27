@@ -7,7 +7,7 @@ use tokio::fs::File;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 const CORES: usize = 32;
-const BENCH_SIZE: usize = 100;
+const BENCH_SIZE: usize = 1024;
 
 struct FileWrapper(File);
 
@@ -72,7 +72,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap();
 
     let ret = rt.block_on(async {
-        Fio::<1024, FileWrapper, Tokio>::bench("Cargo.toml", BENCH_SIZE).await?;
+        Fio::<FileWrapper, Tokio, 1024>::bench("Cargo.toml", BENCH_SIZE).await?;
 
         Ok(())
     });

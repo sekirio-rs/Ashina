@@ -71,7 +71,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start = time::Instant::now();
 
     let ret = async_std::task::block_on(async {
-        Fio::<1024, FileWrapper, AsyncStd>::bench("Cargo.toml", BENCH_SIZE).await?;
+        Fio::<FileWrapper, AsyncStd, 1024>::bench("Cargo.toml", BENCH_SIZE).await?;
 
         Ok(())
     });

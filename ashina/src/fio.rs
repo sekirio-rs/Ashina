@@ -3,12 +3,12 @@ use crate::runtime::Runtime;
 use std::error::Error as StdError;
 use std::marker::PhantomData;
 
-pub struct Fio<const N: usize, F: IFile, R: Runtime> {
+pub struct Fio<F: IFile, R: Runtime, const N: usize> {
     _marker0: PhantomData<F>,
     _marker1: PhantomData<R>,
 }
 
-impl<const N: usize, F: IFile + Send + 'static, R: Runtime> Fio<N, F, R> {
+impl<F: IFile + Send + 'static, R: Runtime, const N: usize> Fio<F, R, N> {
     pub async fn bench(
         path: impl AsRef<std::path::Path> + Copy + Send + Sync + 'static,
         bench_size: usize,
