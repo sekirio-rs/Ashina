@@ -79,7 +79,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let cost = start.elapsed().as_micros();
 
-    println!("[tokio-fio] bench size: {}, cost: {}", BENCH_SIZE, cost);
+    println!("[tokio-fio] bench size: {}, cost: {} micros", BENCH_SIZE, cost);
 
     ret
 }
