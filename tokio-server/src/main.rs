@@ -81,7 +81,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let server = HttpServerBuilder::new()
             .ip("0.0.0.0")
             .port(3344)
-            .build::<TcpListenerWrapper, Tokio>()
+            .build::<1024, TcpListenerWrapper, Tokio>()
             .await?;
 
         server.serve(simple_handler).await?;

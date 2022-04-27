@@ -68,12 +68,12 @@ impl Runtime for AsyncStd {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // simple_logger::SimpleLogger::new().init()?;
-    
+
     async_std::task::block_on(async {
         let server = HttpServerBuilder::new()
             .ip("0.0.0.0")
             .port(3344)
-            .build::<TcpListenerWrapper, AsyncStd>()
+            .build::<1024, TcpListenerWrapper, AsyncStd>()
             .await?;
 
         server.serve(simple_handler).await?;

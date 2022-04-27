@@ -12,7 +12,7 @@ fn main() -> std::io::Result<()> {
             let rt = tokio::runtime::Builder::new_current_thread()
                 .build()
                 .unwrap();
-            
+
             rt.block_on(async move {
                 let emma = emma::Builder::new().build().unwrap();
 
