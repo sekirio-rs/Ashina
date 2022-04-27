@@ -1,12 +1,11 @@
 use ashina::fio::Fio;
 use ashina::fs::IFile;
 use ashina::runtime::Runtime;
+use async_std::fs::File;
+use async_std::io::{ReadExt, WriteExt};
 use futures03::future::BoxFuture;
 use futures03::FutureExt;
-use tokio::fs::File;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-const CORES: usize = 32;
 const BENCH_SIZE: usize = 100;
 
 struct FileWrapper(File);
@@ -18,7 +17,11 @@ impl IFile for FileWrapper {
     where
         Self: Sized,
     {
-        async move { File::open(path).await.map(|f| FileWrapper(f)) }.boxed()
+        async move {
+            let path = path.as_ref().clone();
+            File::open(path).await.map(|f| FileWrapper(f))
+        }
+        .boxed()
     }
 
     fn create<P: AsRef<std::path::Path> + Send + 'static>(
@@ -27,7 +30,11 @@ impl IFile for FileWrapper {
     where
         Self: Sized,
     {
-        async move { File::create(path).await.map(|f| FileWrapper(f)) }.boxed()
+        async move {
+            let path = path.as_ref().clone();
+            File::create(path).await.map(|f| FileWrapper(f))
+        }
+        .boxed()
     }
 
     fn read<'ashina>(
@@ -45,17 +52,15 @@ impl IFile for FileWrapper {
     }
 }
 
-struct Tokio;
+struct AsyncStd;
 
-impl Runtime for Tokio {
+impl Runtime for AsyncStd {
     fn spawn<T>(future: T) -> BoxFuture<'static, T::Output>
     where
         T: futures03::Future + Send + 'static,
         T::Output: Send + 'static,
     {
-        tokio::spawn(future)
-            .map(|output| output.expect("tokio spawn handle return error"))
-            .boxed()
+        async_std::task::spawn(future).boxed()
     }
 }
 
@@ -65,21 +70,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let start = time::Instant::now();
 
-    let rt = tokio::runtime::Builder::new_multi_thread()
-        .worker_threads(CORES)
-        .enable_io()
-        .build()
-        .unwrap();
-
-    let ret = rt.block_on(async {
-        Fio::<1024, FileWrapper, Tokio>::bench("Cargo.toml", BENCH_SIZE).await?;
+    let ret = async_std::task::block_on(async {
+        Fio::<1024, FileWrapper, AsyncStd>::bench("Cargo.toml", BENCH_SIZE).await?;
 
         Ok(())
     });
 
     let cost = start.elapsed().as_micros();
 
-    println!("[tokio-fio] bench size: {}, cost: {}", BENCH_SIZE, cost);
+    println!("[async-fio] bench size: {}, cost: {}", BENCH_SIZE, cost);
 
     ret
 }

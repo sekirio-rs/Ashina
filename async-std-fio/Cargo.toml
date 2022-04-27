@@ -1,0 +1,12 @@
+[package]
+name = "async-std-fio"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ashina = { path = "../ashina" }
+async-std = "1"
+futures03 = { package = "futures", version = "0.3", features = ["compat"] }
+simple_logger = "2.1.0"
