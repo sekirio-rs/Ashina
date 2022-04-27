@@ -3,8 +3,6 @@ use crate::runtime::Runtime;
 use std::error::Error as StdError;
 use std::marker::PhantomData;
 
-const BUFFER_SIZE: usize = 1024;
-
 pub struct HttpServerBuilder<'ashina> {
     ip: Option<&'ashina str>,
     port: Option<u16>,
@@ -25,7 +23,7 @@ impl<'ashina> HttpServerBuilder<'ashina> {
         self.port = Some(port);
         self
     }
-    pub async fn build<T, R>(&self) -> Result<Server<T, R>, Box<dyn StdError>>
+    pub async fn build<const N: usize, T, R>(&self) -> Result<Server<N, T, R>, Box<dyn StdError>>
     where
         T: ITcpListener,
         R: Runtime,
@@ -42,7 +40,7 @@ impl<'ashina> HttpServerBuilder<'ashina> {
     }
 }
 
-pub struct Server<T, R>
+pub struct Server<const N: usize, T, R>
 where
     T: ITcpListener,
     R: Runtime,
@@ -51,7 +49,7 @@ where
     _marker: PhantomData<R>,
 }
 
-impl<T: ITcpListener + 'static, R: Runtime> Server<T, R> {
+impl<const N: usize, T: ITcpListener + 'static, R: Runtime> Server<N, T, R> {
     pub async fn serve(
         self,
         service_fn: impl Fn(&http::Request) -> Result<http::Response, Box<dyn StdError + Send>>
@@ -65,7 +63,7 @@ impl<T: ITcpListener + 'static, R: Runtime> Server<T, R> {
             log::debug!("accept, socket addr: {:?}", socket_addr);
 
             R::spawn(async move {
-                let mut buf = vec![0; BUFFER_SIZE];
+                let mut buf = vec![0; N];
 
                 let _n = stream
                     .read(&mut buf)
