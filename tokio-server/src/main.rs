@@ -59,12 +59,14 @@ impl ITcpListener for TcpListenerWrapper {
 struct Tokio;
 
 impl Runtime for Tokio {
-    fn spawn<T>(future: T)
+    fn spawn<T>(future: T) -> BoxFuture<'static, T::Output>
     where
         T: futures03::Future + Send + 'static,
         T::Output: Send + 'static,
     {
-        tokio::spawn(future);
+        tokio::spawn(future)
+            .map(|output| output.expect("tokio spawn handle return error"))
+            .boxed()
     }
 }
 
@@ -81,7 +83,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let server = HttpServerBuilder::new()
             .ip("0.0.0.0")
             .port(3344)
-            .build::<1024, TcpListenerWrapper, Tokio>()
+            .build::<TcpListenerWrapper, Tokio, 1024>()
             .await?;
 
         server.serve(simple_handler).await?;

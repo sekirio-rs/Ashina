@@ -57,12 +57,12 @@ impl ITcpListener for TcpListenerWrapper {
 struct AsyncStd;
 
 impl Runtime for AsyncStd {
-    fn spawn<T>(future: T)
+    fn spawn<T>(future: T) -> BoxFuture<'static, T::Output>
     where
         T: futures03::Future + Send + 'static,
         T::Output: Send + 'static,
     {
-        async_std::task::spawn(future);
+        async_std::task::spawn(future).boxed()
     }
 }
 
@@ -73,7 +73,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let server = HttpServerBuilder::new()
             .ip("0.0.0.0")
             .port(3344)
-            .build::<1024, TcpListenerWrapper, AsyncStd>()
+            .build::<TcpListenerWrapper, AsyncStd, 1024>()
             .await?;
 
         server.serve(simple_handler).await?;
