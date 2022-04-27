@@ -1,5 +1,3 @@
-/* Copyright (C) 2022 SKTT1Ryze */
-
 #if !defined(__cpp_impl_coroutine)
 #define __cpp_impl_coroutine 1
 #endif
@@ -223,6 +221,8 @@ class TcpListener {
   TcpListener(int sockfd);
   ~TcpListener();
 
+  void set_reuseaddr(bool reuseaddr);
+  void set_reuseport(bool reuseport);
   void bind_socket(const char* ip_addr, unsigned short int sin_port);
   void listen_socket(int backlog);
   Map<__s32, Accept, int> async_accept(std::shared_ptr<io_uring>& uring,

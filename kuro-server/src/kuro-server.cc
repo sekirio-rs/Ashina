@@ -1,6 +1,7 @@
-#include <iostream>
 #include <arpa/inet.h>
 #include <fcntl.h>
+
+#include <iostream>
 
 #include "kuro.h"
 
@@ -14,15 +15,14 @@ Task<int> co_echo(std::shared_ptr<io_uring>& handle) {
   TcpStream stream_ = TcpStream();
 
   listener.bind_socket("127.0.0.1", htons(3344));
-  
+
   listener.listen_socket(BACKLOG);
 
   co_await listener.async_accept(handle, &stream_);
-  
-  if(posix_memalign(&buf, BUF_LEN, BUF_LEN))
-    co_return 1;
 
-  while(1) {
+  if (posix_memalign(&buf, BUF_LEN, BUF_LEN)) co_return 1;
+
+  while (1) {
     int n = co_await stream_.async_recv(handle, buf, BUF_LEN);
 
     if (n == 0) break;
@@ -40,9 +40,9 @@ int main() {
     std::cout << "io_uring_queue_init error" << std::endl;
     return 1;
   }
-  
+
   std::shared_ptr<io_uring> handle = std::make_shared<io_uring>(ring);
-  
+
   auto task = co_echo(handle);
 
   async_execute(handle);
