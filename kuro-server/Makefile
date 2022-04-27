@@ -19,7 +19,7 @@ $(DEST): $(SRC)
 	$(CC) $(CFLAGS) $(SRC) -o $(DEST) $(LDFLAGS)
 
 run: $(DEST)
-	@export LD_LIBRARY_PATH=./$L/ && ./$(DEST)
+	export LD_LIBRARY_PATH=./$L/ && ./$(DEST)
 
 format:
 	$(FORMAT) $(FFLAGS) $S/*
