@@ -1,9 +1,10 @@
 use emma::fs::File;
 use emma::Emma;
 
-const BENCH_SIZE: usize = 1024;
+const BENCH_SIZE: usize = 1024 * 32;
 const BUFFER_SIZE: usize = 1024;
 const CORES: usize = 32;
+const MAX_FILE: usize = 512;
 
 async fn files(
     emma: &Emma,
@@ -43,43 +44,46 @@ fn main() -> std::io::Result<()> {
 
             if let Err(e) = rt.block_on(async move {
                 let emma = emma::Builder::new().build().unwrap();
-                let size = BENCH_SIZE / CORES;
+                let bench_size = BENCH_SIZE / CORES;
+                let max_file = MAX_FILE / CORES;
 
-                let mut bufs = (0..size)
-                    .into_iter()
-                    .map(|_| [0u8; BUFFER_SIZE])
-                    .collect::<Vec<[u8; BUFFER_SIZE]>>();
+                for _ in 0..(bench_size / max_file) {
+                    let mut bufs = (0..max_file)
+                        .into_iter()
+                        .map(|_| [0u8; BUFFER_SIZE])
+                        .collect::<Vec<[u8; BUFFER_SIZE]>>();
 
-                {
-                    let mut files = files(&emma, "Cargo.toml", false, size)
-                        .await
-                        .expect("open files error");
-
-                    let mut join = emma::Join::new(emma::Reactor::new(&emma));
-
-                    for fut in
-                        File::multi_read(&mut files, &emma, &mut bufs).expect("multi_read error")
                     {
-                        join.as_mut().join(fut);
+                        let mut files = files(&emma, "Cargo.toml", false, max_file)
+                            .await
+                            .expect("open files error");
+
+                        let mut join = emma::Join::new(emma::Reactor::new(&emma));
+
+                        for fut in File::multi_read(&mut files, &emma, &mut bufs)
+                            .expect("multi_read error")
+                        {
+                            join.as_mut().join(fut);
+                        }
+
+                        join.await.map(|_| ()).map_err(|e| e.as_io_error())?;
                     }
 
-                    join.await.map(|_| ()).map_err(|e| e.as_io_error())?;
-                }
-
-                {
-                    let mut files = files(&emma, "/dev/null", true, size)
-                        .await
-                        .expect("create file error");
-
-                    let mut join = emma::Join::new(emma::Reactor::new(&emma));
-
-                    for fut in
-                        File::multi_write(&mut files, &emma, &bufs).expect("multi_write error")
                     {
-                        join.as_mut().join(fut);
-                    }
+                        let mut files = files(&emma, "/dev/null", true, max_file)
+                            .await
+                            .expect("create file error");
 
-                    join.await.map(|_| ()).map_err(|e| e.as_io_error())?;
+                        let mut join = emma::Join::new(emma::Reactor::new(&emma));
+
+                        for fut in
+                            File::multi_write(&mut files, &emma, &bufs).expect("multi_write error")
+                        {
+                            join.as_mut().join(fut);
+                        }
+
+                        join.await.map(|_| ()).map_err(|e| e.as_io_error())?;
+                    }
                 }
 
                 Ok(())
