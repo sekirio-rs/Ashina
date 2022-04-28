@@ -72,7 +72,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap();
 
     let ret = rt.block_on(async {
-        Fio::<FileWrapper, Tokio, 1024>::bench("Cargo.toml", BENCH_SIZE).await?;
+        Fio::<FileWrapper, Tokio, 1024>::bench("../LICENSE", BENCH_SIZE).await?;
 
         Ok(())
     });
