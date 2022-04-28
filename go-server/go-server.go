@@ -7,15 +7,20 @@ import (
 	"net"
 )
 
+const BUFFER_LEN = 1024
+
 func serve(conn net.Conn) {
 	defer conn.Close()
 
 	reader := bufio.NewReader(conn)
-	var buffer []byte
+	buffer := make([]byte, BUFFER_LEN)
 
-	_, err := reader.Read(buffer)
+	n, err := reader.Read(buffer)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if n == 0 {
+		log.Fatal("read empty")
 	}
 
 	writer := bufio.NewWriter(conn)
@@ -25,7 +30,6 @@ func serve(conn net.Conn) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 func main() {
