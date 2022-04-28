@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 
+#include <chrono>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -9,7 +10,7 @@
 #include "kuro.h"
 
 #define QD 1024
-#define BENCH_SIZE 1024
+#define BENCH_SIZE 1024 * 32
 #define BUF_LEN 1024
 #define CORES 32
 #define MAX_FILE 512
@@ -29,7 +30,7 @@ Task<int> co_fio(std::shared_ptr<io_uring>& handle) {
 
   int n = co_await file.read(handle, buf, BUF_LEN);
 
-  int null_fd = co_await async_open(handle, "/dev/null");
+  int null_fd = co_await async_create(handle, "/dev/null");
 
   if (null_fd < 0) {
     std::cout << "open /dev/null error." << std::endl;
@@ -44,6 +45,8 @@ Task<int> co_fio(std::shared_ptr<io_uring>& handle) {
 
 int main() {
   std::vector<std::thread> threads;
+
+  auto start = std::chrono::system_clock::now();
 
   for (int i = 0; i < CORES; i++) {
     std::thread h([] {
@@ -74,6 +77,13 @@ int main() {
   for (std::thread& h : threads) {
     if (h.joinable()) h.join();
   }
+
+  auto end = std::chrono::system_clock::now();
+  auto cost =
+      std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+  std::cout << "[kuro-fio] bench_size: " << BENCH_SIZE
+            << ", cost: " << cost.count() << std::endl;
 
   return 0;
 }
