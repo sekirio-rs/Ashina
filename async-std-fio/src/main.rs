@@ -6,7 +6,7 @@ use async_std::io::{ReadExt, WriteExt};
 use futures03::future::BoxFuture;
 use futures03::FutureExt;
 
-const BENCH_SIZE: usize = 1024;
+const BENCH_SIZE: usize = 1024 * 32;
 
 struct FileWrapper(File);
 

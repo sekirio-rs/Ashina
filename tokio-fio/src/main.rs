@@ -7,7 +7,7 @@ use tokio::fs::File;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 const CORES: usize = 32;
-const BENCH_SIZE: usize = 1024;
+const BENCH_SIZE: usize = 1024 * 32;
 
 struct FileWrapper(File);
 
@@ -79,7 +79,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let cost = start.elapsed().as_micros();
 
-    println!("[tokio-fio] bench size: {}, cost: {} micros", BENCH_SIZE, cost);
+    println!(
+        "[tokio-fio] bench size: {}, cost: {} micros",
+        BENCH_SIZE, cost
+    );
 
     ret
 }
