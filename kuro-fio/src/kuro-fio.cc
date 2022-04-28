@@ -18,7 +18,7 @@
 Task<int> co_fio(std::shared_ptr<io_uring>& handle) {
   void* buf;
 
-  int fd = co_await async_open(handle, "Makefile");
+  int fd = co_await async_open(handle, "../LICENSE");
 
   if (fd < 0) {
     std::cout << "open file error, fd: " << fd << std::endl;

@@ -54,7 +54,7 @@ fn main() -> std::io::Result<()> {
                         .collect::<Vec<[u8; BUFFER_SIZE]>>();
 
                     {
-                        let mut files = files(&emma, "Cargo.toml", false, max_file)
+                        let mut files = files(&emma, "../LICENSE", false, max_file)
                             .await
                             .expect("open files error");
 
