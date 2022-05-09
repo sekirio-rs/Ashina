@@ -8,5 +8,6 @@ members = [
   "async-std-fio",
   "emma-server",
   "emma-fio",
-  "std-server"
+  "std-server",
+  "std-fio"
 ]
