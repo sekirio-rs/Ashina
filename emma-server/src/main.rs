@@ -35,14 +35,24 @@ fn main() -> std::io::Result<()> {
                                         .await
                                         .expect("recv_msg error");
 
+                                    let mut svg = open_file(&emma_cloned, "github.svg")
+                                        .await
+                                        .expect("open github.svg error");
+                                    read_file(&emma_cloned, &mut svg, &mut buf)
+                                        .await
+                                        .expect("read github.svg error");
+
                                     let resp = format!(
-                                        "HTTP/1.1 200 OK\r\nServer: {}\r\n\r\n{:?}",
-                                        "Ashina", &buf
+                                        "HTTP/1.1 200 OK\r\nAccept-Ranges: bytes\r\nCache-Control: public, max-age=0\r\nETag: W/\"3c8-180fe2971b6\"\r\nContent-Type: image/svg+xml\r\nContent-Length: 968\r\n\r\n"
                                     );
 
                                     send_msg(&emma_cloned, resp.as_bytes(), &stream)
                                         .await
-                                        .expect("send_msg error");
+                                        .expect("send response error");
+
+                                    send_msg(&emma_cloned, &buf, &stream)
+                                        .await
+                                        .expect("send image error");
                                 })
                                 .await
                                 .unwrap();

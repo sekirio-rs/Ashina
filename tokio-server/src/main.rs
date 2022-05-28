@@ -71,7 +71,7 @@ impl Runtime for Tokio {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // simple_logger::SimpleLogger::new().init()?;
+    simple_logger::SimpleLogger::new().init()?;
 
     let rt = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(CORES)

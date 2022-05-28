@@ -4,7 +4,7 @@ use crate::net::http;
 pub fn simple_handler(
     req: &http::Request,
 ) -> Result<http::Response, Box<dyn std::error::Error + Send>> {
-    log::info!("handle request: {:?}", req);
+    log::info!("handle request: {:?}", String::from_utf8_lossy(req.as_bytes()));
 
     let resp = format!(
         "HTTP/1.1 200 OK\r\nServer: {}\r\n\r\n{:?}",
