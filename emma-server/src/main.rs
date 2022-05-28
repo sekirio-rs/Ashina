@@ -43,7 +43,13 @@ fn main() -> std::io::Result<()> {
                                         .expect("read github.svg error");
 
                                     let resp = format!(
-                                        "HTTP/1.1 200 OK\r\nAccept-Ranges: bytes\r\nCache-Control: public, max-age=0\r\nETag: W/\"3c8-180fe2971b6\"\r\nContent-Type: image/svg+xml\r\nContent-Length: 968\r\n\r\n"
+                                        "HTTP/1.1 200 OK\r
+Accept-Ranges: bytes\r
+Cache-Control: public, max-age=0\r
+ETag: W/\"3c8-180fe2971b6\"\r
+Content-Type: image/svg+xml\r
+Content-Length: 968\r
+\r\n"
                                     );
 
                                     send_msg(&emma_cloned, resp.as_bytes(), &stream)
