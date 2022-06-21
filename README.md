@@ -1,5 +1,5 @@
 # Ashina
-Performance evaluation server for sekirio-rs.
+Performance evaluation platform for sekirio-rs.
 
 ## Kuro/Emma vs Tokio/async-std/Go
 ### Way of Performance Evaluation
@@ -7,3 +7,6 @@ Performance evaluation server for sekirio-rs.
 
 ### Result of Performance Evaluation
 <img src="./images/test-result.png">
+
+## End
+More details in [thesis](https://github.com/SKTT1Ryze/Graduation2022/tree/main/thesis).
